@@ -240,8 +240,8 @@ const supabase = createClient(
 let allData = [], currentFilter = 'todos', searchTerm = ''
 
 // QR Code
-const simURL = window.location.origin + window.location.pathname.replace('painel.html','') + 'index.html'
-new QRCode(document.getElementById('qr-canvas'), {
+const simURL = 'https://reforma-tributaria-nine.vercel.app/'
+  new QRCode(document.getElementById('qr-canvas'), {
   text: simURL, width: 120, height: 120,
   colorDark: '#005EB8', colorLight: '#FFFFFF',
   correctLevel: QRCode.CorrectLevel.M
