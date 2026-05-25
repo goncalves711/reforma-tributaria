@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel — Diagnósticos Reforma Tributária</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --azul:        #005EB8;
+      --azul-escuro: #003F7F;
+      --azul-claro:  #0089CF;
+      --azul-bg:     #EBF4FB;
+      --cinza-bg:    #F4F6F9;
+      --cinza-borda: #DDE3EC;
+      --cinza-texto: #6B7A90;
+      --texto:       #1A2332;
+      --branco:      #FFFFFF;
+      --verde:       #00884A;
+      --verde-bg:    #E6F4EE;
+      --amarelo:     #F5A623;
+      --amarelo-bg:  #FEF5E7;
+      --vermelho:    #D0021B;
+      --vermelho-bg: #FDECEA;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--cinza-bg); color: var(--texto); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+    /* ── HEADER ── */
+    .top-bar { background: var(--azul); padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .top-bar-left h1 { font-size: 16px; font-weight: 700; color: #fff; }
+    .top-bar-left p  { font-size: 12px; color: rgba(255,255,255,0.65); margin-top: 2px; }
+    .btn-refresh { padding: 8px 14px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 8px; color: #fff; font-size: 13px; font-weight: 500; font-family: 'Inter', sans-serif; cursor: pointer; transition: background 0.15s; }
+    .btn-refresh:hover { background: rgba(255,255,255,0.25); }
+
+    /* ── LAYOUT ── */
+    .content { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+
+    /* ── STATS ── */
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.25rem; }
+    @media (max-width: 640px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+
+    .stat-card { background: var(--branco); border-radius: 12px; padding: 1rem 1.1rem; box-shadow: 0 1px 4px rgba(0,60,120,0.06); }
+    .stat-label { font-size: 11px; font-weight: 600; color: var(--cinza-texto); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .stat-value { font-size: 28px; font-weight: 700; color: var(--texto); }
+    .stat-value.red    { color: var(--vermelho); }
+    .stat-value.amber  { color: var(--amarelo); }
+    .stat-value.green  { color: var(--verde); }
+
+    /* ── QR + FILTROS ── */
+    .top-row { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-bottom: 1.25rem; align-items: start; }
+    @media (max-width: 640px) { .top-row { grid-template-columns: 1fr; } }
+
+    .filtros { display: flex; flex-wrap: wrap; gap: 6px; }
+    .filter-btn { padding: 7px 14px; border-radius: 100px; border: 1.5px solid var(--cinza-borda); background: var(--branco); color: var(--cinza-texto); font-size: 13px; font-weight: 500; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.15s; }
+    .filter-btn.active { background: var(--azul); border-color: var(--azul); color: #fff; }
+    .filter-btn .cnt { display: inline-block; background: rgba(255,255,255,0.2); border-radius: 100px; padding: 0 6px; font-size: 11px; margin-left: 4px; }
+    .filter-btn:not(.active) .cnt { background: var(--cinza-bg); color: var(--cinza-texto); }
+
+    .qr-card { background: var(--branco); border-radius: 12px; padding: 1rem; box-shadow: 0 1px 4px rgba(0,60,120,0.06); text-align: center; min-width: 160px; }
+    .qr-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--cinza-texto); margin-bottom: 8px; }
+    #qr-canvas { display: flex; justify-content: center; margin-bottom: 8px; }
+    #qr-canvas canvas, #qr-canvas img { border-radius: 6px; width: 120px !important; height: 120px !important; }
+    .btn-dl-qr { width: 100%; padding: 7px; background: var(--azul-bg); border: none; border-radius: 8px; color: var(--azul); font-size: 12px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; }
+
+    /* ── BUSCA ── */
+    .search-wrap { margin-bottom: 1rem; }
+    .search-input { width: 100%; padding: 11px 14px; background: var(--branco); border: 1.5px solid var(--cinza-borda); border-radius: 10px; font-size: 14px; font-family: 'Inter', sans-serif; color: var(--texto); outline: none; transition: border-color 0.2s; box-shadow: 0 1px 4px rgba(0,60,120,0.04); }
+    .search-input:focus { border-color: var(--azul); }
+    .search-input::placeholder { color: #B0BAC8; }
+
+    /* ── TABELA ── */
+    .table-card { background: var(--branco); border-radius: 14px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,60,120,0.06); }
+    .table-head { padding: 1rem 1.25rem; border-bottom: 1px solid var(--cinza-borda); }
+    .table-head h2 { font-size: 14px; font-weight: 700; color: var(--texto); }
+    .table-head p { font-size: 12px; color: var(--cinza-texto); margin-top: 2px; }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th { padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--cinza-texto); background: var(--cinza-bg); border-bottom: 1px solid var(--cinza-borda); white-space: nowrap; }
+    tbody tr { border-bottom: 1px solid var(--cinza-borda); cursor: pointer; transition: background 0.12s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--azul-bg); }
+    td { padding: 13px 16px; font-size: 13px; vertical-align: middle; }
+    .td-main { font-weight: 600; color: var(--texto); }
+    .td-sub  { font-size: 12px; color: var(--cinza-texto); margin-top: 2px; }
+
+    .pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; }
+    .pill-alto  { background: var(--vermelho-bg); color: var(--vermelho); }
+    .pill-medio { background: var(--amarelo-bg);  color: var(--amarelo); }
+    .pill-baixo { background: var(--verde-bg);    color: var(--verde); }
+    .pill-dot   { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+    .score-chip { display: inline-block; background: var(--cinza-bg); color: var(--cinza-texto); font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 6px; }
+
+    .empty-cell { padding: 3rem; text-align: center; color: var(--cinza-texto); font-size: 14px; }
+
+    /* ── MODAL ── */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,30,60,0.5); z-index: 100; align-items: flex-end; justify-content: center; padding: 0; }
+    @media (min-width: 600px) { .modal-overlay { align-items: center; padding: 1rem; } }
+    .modal-overlay.open { display: flex; }
+
+    .modal { background: var(--branco); border-radius: 20px 20px 0 0; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; padding: 1.5rem; animation: slideUp 0.25s ease; }
+    @media (min-width: 600px) { .modal { border-radius: 16px; } }
+
+    .modal-handle { width: 36px; height: 4px; background: var(--cinza-borda); border-radius: 2px; margin: 0 auto 1.25rem; }
+    @media (min-width: 600px) { .modal-handle { display: none; } }
+
+    .modal-hdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem; }
+    .modal-hdr h3 { font-size: 17px; font-weight: 700; color: var(--texto); }
+    .modal-hdr p  { font-size: 13px; color: var(--cinza-texto); margin-top: 3px; }
+    .btn-close { background: var(--cinza-bg); border: none; border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--cinza-texto); font-size: 16px; flex-shrink: 0; }
+
+    .modal-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1.25rem; }
+    .meta-item { background: var(--cinza-bg); border-radius: 10px; padding: 10px 12px; }
+    .meta-key { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--cinza-texto); margin-bottom: 4px; }
+    .meta-val { font-size: 13px; font-weight: 500; color: var(--texto); }
+
+    .modal-urg { border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; border: 1.5px solid; }
+    .modal-urg.ALTO  { background: var(--vermelho-bg); border-color: rgba(208,2,27,0.2); }
+    .modal-urg.MEDIO { background: var(--amarelo-bg);  border-color: rgba(245,166,35,0.3); }
+    .modal-urg.BAIXO { background: var(--verde-bg);    border-color: rgba(0,136,74,0.2); }
+    .murg-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 5px; }
+    .ALTO  .murg-label { color: var(--vermelho); }
+    .MEDIO .murg-label { color: var(--amarelo); }
+    .BAIXO .murg-label { color: var(--verde); }
+    .murg-resumo { font-size: 14px; font-weight: 600; color: var(--texto); line-height: 1.4; }
+    .modal-diag { font-size: 13px; color: #3A4A5C; line-height: 1.8; white-space: pre-wrap; }
+
+    .divider { height: 1px; background: var(--cinza-borda); margin: 1.25rem 0; }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="top-bar-left">
+    <h1>Painel de Diagnósticos</h1>
+    <p id="last-update">Reforma Tributária 2026</p>
+  </div>
+  <button class="btn-refresh" onclick="loadData()">↻ Atualizar</button>
+</div>
+
+<div class="content">
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value" id="s-total">—</div></div>
+    <div class="stat-card"><div class="stat-label">Urgência Alta</div><div class="stat-value red" id="s-alto">—</div></div>
+    <div class="stat-card"><div class="stat-label">Média</div><div class="stat-value amber" id="s-medio">—</div></div>
+    <div class="stat-card"><div class="stat-label">Baixa</div><div class="stat-value green" id="s-baixo">—</div></div>
+  </div>
+
+  <!-- Filtros + QR -->
+  <div class="top-row">
+    <div>
+      <div class="filtros">
+        <button class="filter-btn active" onclick="setFilter('todos',this)">Todos <span class="cnt" id="cnt-all">—</span></button>
+        <button class="filter-btn" onclick="setFilter('ALTO',this)">⚠️ Alta <span class="cnt" id="cnt-alto">—</span></button>
+        <button class="filter-btn" onclick="setFilter('MEDIO',this)">👀 Média <span class="cnt" id="cnt-medio">—</span></button>
+        <button class="filter-btn" onclick="setFilter('BAIXO',this)">✅ Baixa <span class="cnt" id="cnt-baixo">—</span></button>
+      </div>
+    </div>
+    <div class="qr-card">
+      <div class="qr-title">QR — Simulador</div>
+      <div id="qr-canvas"></div>
+      <button class="btn-dl-qr" onclick="downloadQR()">↓ Baixar</button>
+    </div>
+  </div>
+
+  <!-- Busca -->
+  <div class="search-wrap">
+    <input class="search-input" type="text" placeholder="🔍  Buscar empresa ou nome…" oninput="doSearch(this.value)" />
+  </div>
+
+  <!-- Tabela -->
+  <div class="table-card">
+    <div class="table-head">
+      <h2>Registros</h2>
+      <p id="table-count">Carregando…</p>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>Empresa / Responsável</th>
+            <th>Contato</th>
+            <th>Regime</th>
+            <th>Score</th>
+            <th>Urgência</th>
+            <th>Data</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="6" class="empty-cell">Carregando…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal" id="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-hdr">
+      <div><h3 id="m-empresa">—</h3><p id="m-nome">—</p></div>
+      <button class="btn-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div class="modal-meta">
+      <div class="meta-item"><div class="meta-key">Contato</div><div class="meta-val" id="m-contato">—</div></div>
+      <div class="meta-item"><div class="meta-key">Data</div><div class="meta-val" id="m-data">—</div></div>
+      <div class="meta-item"><div class="meta-key">Regime</div><div class="meta-val" id="m-regime">—</div></div>
+      <div class="meta-item"><div class="meta-key">Faturamento</div><div class="meta-val" id="m-fat">—</div></div>
+      <div class="meta-item"><div class="meta-key">Setor</div><div class="meta-val" id="m-setor">—</div></div>
+      <div class="meta-item"><div class="meta-key">Score</div><div class="meta-val" id="m-score">—</div></div>
+    </div>
+    <div class="modal-urg" id="m-urg">
+      <div class="murg-label" id="m-urg-label">—</div>
+      <div class="murg-resumo" id="m-resumo">—</div>
+    </div>
+    <div class="divider"></div>
+    <div class="modal-diag" id="m-diag">—</div>
+  </div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+const supabase = createClient(
+  'https://duuavlthmjnmaxixrtwi.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1dWF2bHRobWpubWF4aXhydHdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODYzMjksImV4cCI6MjA5MzY2MjMyOX0.lNbuDtPcOiG2oYPL7C8U9gzGz3tPymPu3MlHUVVRd38'
+)
+
+let allData = [], currentFilter = 'todos', searchTerm = ''
+
+// QR Code
+const simURL = window.location.origin + window.location.pathname.replace('painel.html','') + 'index.html'
+new QRCode(document.getElementById('qr-canvas'), {
+  text: simURL, width: 120, height: 120,
+  colorDark: '#005EB8', colorLight: '#FFFFFF',
+  correctLevel: QRCode.CorrectLevel.M
+})
+
+window.downloadQR = function() {
+  const c = document.querySelector('#qr-canvas canvas')
+  if (!c) return
+  const a = document.createElement('a')
+  a.download = 'qr-diagnostico.png'; a.href = c.toDataURL(); a.click()
+}
+
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+
+window.loadData = async function() {
+  const { data } = await supabase.from('diagnosticos').select('*').order('created_at', { ascending: false })
+  allData = data || []
+  updateStats()
+  renderTable()
+  document.getElementById('last-update').textContent = 'Atualizado ' + new Date().toLocaleTimeString('pt-BR')
+}
+
+function updateStats() {
+  const alto  = allData.filter(d => d.urgencia === 'ALTO').length
+  const medio = allData.filter(d => d.urgencia === 'MEDIO').length
+  const baixo = allData.filter(d => d.urgencia === 'BAIXO').length
+  document.getElementById('s-total').textContent = allData.length
+  document.getElementById('s-alto').textContent  = alto
+  document.getElementById('s-medio').textContent = medio
+  document.getElementById('s-baixo').textContent = baixo
+  document.getElementById('cnt-all').textContent   = allData.length
+  document.getElementById('cnt-alto').textContent  = alto
+  document.getElementById('cnt-medio').textContent = medio
+  document.getElementById('cnt-baixo').textContent = baixo
+}
+
+function renderTable() {
+  let filtered = allData
+  if (currentFilter !== 'todos') filtered = filtered.filter(d => d.urgencia === currentFilter)
+  if (searchTerm) {
+    const s = searchTerm.toLowerCase()
+    filtered = filtered.filter(d =>
+      (d.empresa||'').toLowerCase().includes(s) ||
+      (d.nome||'').toLowerCase().includes(s) ||
+      (d.contato||'').toLowerCase().includes(s)
+    )
+  }
+  document.getElementById('table-count').textContent = filtered.length + ' registro' + (filtered.length !== 1 ? 's' : '')
+  if (!filtered.length) {
+    document.getElementById('tbody').innerHTML = '<tr><td colspan="6" class="empty-cell">Nenhum registro encontrado.</td></tr>'
+    return
+  }
+  document.getElementById('tbody').innerHTML = filtered.map(d => {
+    const date = new Date(d.created_at).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'2-digit' })
+    const pc = d.urgencia === 'ALTO' ? 'pill-alto' : d.urgencia === 'MEDIO' ? 'pill-medio' : 'pill-baixo'
+    const pl = d.urgencia === 'ALTO' ? '⚠️ Alta' : d.urgencia === 'MEDIO' ? '👀 Média' : '✅ Baixa'
+    return `<tr onclick="openModal('${d.id}')">
+      <td><div class="td-main">${esc(d.empresa)}</div><div class="td-sub">${esc(d.nome)}</div></td>
+      <td><div class="td-sub">${esc(d.contato)}</div></td>
+      <td><div class="td-sub">${esc(d.regime||'—')}</div></td>
+      <td><span class="score-chip">${d.score_total != null ? d.score_total+'/100' : '—'}</span></td>
+      <td><span class="pill ${pc}"><span class="pill-dot"></span>${pl}</span></td>
+      <td><div class="td-sub">${date}</div></td>
+    </tr>`
+  }).join('')
+}
+
+window.setFilter = function(f, btn) {
+  currentFilter = f
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+  renderTable()
+}
+
+window.doSearch = function(v) { searchTerm = v; renderTable() }
+
+window.openModal = function(id) {
+  const d = allData.find(x => x.id === id); if (!d) return
+  document.getElementById('m-empresa').textContent = d.empresa
+  document.getElementById('m-nome').textContent    = d.nome
+  document.getElementById('m-contato').textContent = d.contato
+  document.getElementById('m-data').textContent    = new Date(d.created_at).toLocaleString('pt-BR')
+  document.getElementById('m-regime').textContent  = d.regime || '—'
+  document.getElementById('m-fat').textContent     = d.faturamento || '—'
+  document.getElementById('m-setor').textContent   = d.setor || '—'
+  document.getElementById('m-score').textContent   = d.score_total != null ? d.score_total + '/100' : '—'
+  document.getElementById('m-resumo').textContent  = d.resumo || '—'
+  document.getElementById('m-diag').textContent    = d.diagnostico || '—'
+  const urg = document.getElementById('m-urg')
+  urg.className = 'modal-urg ' + d.urgencia
+  document.getElementById('m-urg-label').textContent = d.urgencia === 'ALTO' ? '⚠️ Urgência Alta' : d.urgencia === 'MEDIO' ? '👀 Fique de Olho' : '✅ Tranquilo por Enquanto'
+  document.getElementById('modal').classList.add('open')
+}
+
+window.closeModal      = function(e) { if (e.target === document.getElementById('modal')) closeModalDirect() }
+window.closeModalDirect = function()  { document.getElementById('modal').classList.remove('open') }
+
+loadData()
+setInterval(loadData, 30000)
+</script>
+</body>
+</html>

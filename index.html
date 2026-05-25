@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Diagnóstico — Reforma Tributária</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --azul:        #005EB8;
+      --azul-esc:    #003F7F;
+      --azul-med:    #0089CF;
+      --azul-bg:     #EBF4FB;
+      --cinza-bg:    #F4F6F9;
+      --cinza-bd:    #DDE3EC;
+      --cinza-txt:   #6B7A90;
+      --texto:       #1A2332;
+      --branco:      #FFFFFF;
+      --verde:       #00884A;
+      --verde-bg:    #E6F4EE;
+      --verde-bd:    rgba(0,136,74,0.2);
+      --amarelo:     #D07B00;
+      --amarelo-bg:  #FEF5E7;
+      --amarelo-bd:  rgba(208,123,0,0.25);
+      --vermelho:    #C0001A;
+      --vermelho-bg: #FDECEA;
+      --vermelho-bd: rgba(192,0,26,0.2);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--cinza-bg);
+      color: var(--texto);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: var(--azul);
+      padding: 1.5rem 1.25rem 1.75rem;
+      text-align: center;
+    }
+
+    .logo-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 100px;
+      margin-bottom: 1rem;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      font-size: 14px;
+      color: rgba(255,255,255,0.78);
+      line-height: 1.5;
+    }
+
+    /* ── PROGRESS ── */
+    .progress-wrap {
+      background: var(--azul-esc);
+      padding: 10px 1.25rem;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.65);
+      margin-bottom: 6px;
+    }
+
+    .progress-bar {
+      height: 4px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #fff;
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+
+    /* ── CONTAINER ── */
+    .container {
+      padding: 1rem 1rem 5rem;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--branco);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 1px 6px rgba(0,50,100,0.08);
+      animation: fadeUp 0.25s ease both;
+    }
+
+    /* ── TELA DADOS ── */
+    .dados-topo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 1.25rem;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid var(--cinza-bd);
+    }
+
+    .dados-icone {
+      width: 42px; height: 42px;
+      background: var(--azul-bg);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .dados-topo h2 { font-size: 16px; font-weight: 700; }
+    .dados-topo p  { font-size: 12px; color: var(--cinza-txt); margin-top: 2px; }
+
+    .form-group { margin-bottom: 1rem; }
+
+    .form-group label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--cinza-txt);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+
+    .form-group input {
+      width: 100%;
+      background: var(--cinza-bg);
+      border: 1.5px solid var(--cinza-bd);
+      border-radius: 10px;
+      padding: 13px 14px;
+      font-size: 15px;
+      font-family: 'Inter', sans-serif;
+      color: var(--texto);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      -webkit-appearance: none;
+    }
+
+    .form-group input:focus {
+      border-color: var(--azul);
+      box-shadow: 0 0 0 3px rgba(0,94,184,0.1);
+      background: #fff;
+    }
+
+    .form-group input::placeholder { color: #B0BAC8; }
+
+    /* ── PERGUNTA ── */
+    .q-num {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--azul-med);
+      margin-bottom: 6px;
+    }
+
+    .q-label {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--texto);
+      line-height: 1.4;
+      margin-bottom: 6px;
+    }
+
+    .q-sub {
+      font-size: 13px;
+      color: var(--cinza-txt);
+      line-height: 1.5;
+      padding: 10px 12px;
+      background: var(--azul-bg);
+      border-left: 3px solid var(--azul-med);
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 1.25rem;
+    }
+
+    /* ── OPÇÕES ── */
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 0.25rem;
+    }
+
+    .opt {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      background: var(--cinza-bg);
+      border: 1.5px solid var(--cinza-bd);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .opt:active { transform: scale(0.98); }
+
+    .opt.selected {
+      background: var(--azul-bg);
+      border-color: var(--azul);
+    }
+
+    .opt-radio {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--cinza-bd);
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: #fff;
+      transition: all 0.15s;
+    }
+
+    .opt.selected .opt-radio {
+      border-color: var(--azul);
+      background: var(--azul);
+    }
+
+    .opt.selected .opt-radio::after {
+      content: '';
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #fff;
+    }
+
+    .opt-text {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--texto);
+      line-height: 1.4;
+      flex: 1;
+    }
+
+    .opt.selected .opt-text { color: var(--azul-esc); font-weight: 600; }
+
+    /* ── BOTÕES ── */
+    .nav { display: flex; gap: 10px; margin-top: 1.5rem; }
+
+    button {
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      border: none; outline: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-back {
+      padding: 13px 16px;
+      background: transparent;
+      border: 1.5px solid var(--cinza-bd);
+      border-radius: 12px;
+      color: var(--cinza-txt);
+      font-size: 14px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .btn-next {
+      flex: 1;
+      padding: 14px;
+      background: var(--azul);
+      border-radius: 12px;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s;
+    }
+
+    .btn-next:active { background: var(--azul-esc); transform: scale(0.98); }
+    .btn-next:disabled { opacity: 0.35; pointer-events: none; }
+
+    /* ── LOADING ── */
+    .loading-state {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 16px;
+      padding: 2.5rem 1rem; text-align: center;
+    }
+
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--cinza-bd);
+      border-top-color: var(--azul);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .loading-state strong { font-size: 15px; font-weight: 700; }
+    .loading-state p { font-size: 13px; color: var(--cinza-txt); }
+
+    /* ── RESULTADO ── */
+    .saved-ok {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 600;
+      color: var(--verde);
+      background: var(--verde-bg);
+      border: 1px solid var(--verde-bd);
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-bottom: 1.25rem;
+    }
+
+    .veredito {
+      border-radius: 14px;
+      padding: 1.5rem 1.25rem;
+      text-align: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .veredito.ALTO   { background: var(--vermelho-bg); border: 1.5px solid var(--vermelho-bd); }
+    .veredito.MEDIO  { background: var(--amarelo-bg);  border: 1.5px solid var(--amarelo-bd); }
+    .veredito.BAIXO  { background: var(--verde-bg);    border: 1.5px solid var(--verde-bd); }
+
+    .veredito-emoji { font-size: 40px; margin-bottom: 10px; line-height: 1; }
+
+    .veredito-nivel {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .ALTO  .veredito-nivel { color: var(--vermelho); }
+    .MEDIO .veredito-nivel { color: var(--amarelo); }
+    .BAIXO .veredito-nivel { color: var(--verde); }
+
+    .veredito-resumo {
+      font-size: 16px; font-weight: 700;
+      color: var(--texto); line-height: 1.4;
+    }
+
+    .veredito-score {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 12px; font-weight: 600;
+      color: var(--cinza-txt);
+      background: rgba(255,255,255,0.75);
+      padding: 3px 12px; border-radius: 100px;
+    }
+
+    .diag-titulo {
+      font-size: 12px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.07em;
+      color: var(--cinza-txt);
+      margin-bottom: 12px;
+    }
+
+    .diag-texto {
+      font-size: 14px;
+      color: #3A4A5C;
+      line-height: 1.8;
+      white-space: pre-wrap;
+    }
+
+    .divider { height: 1px; background: var(--cinza-bd); margin: 1.25rem 0; }
+
+    .btn-restart {
+      width: 100%; padding: 13px;
+      background: var(--cinza-bg);
+      border: 1.5px solid var(--cinza-bd);
+      border-radius: 12px;
+      color: var(--cinza-txt);
+      font-size: 14px; font-weight: 600;
+      margin-top: 1.25rem;
+    }
+
+    .btn-restart:active { background: var(--cinza-bd); }
+
+    /* ── ERRO ── */
+    .erro-box {
+      padding: 1.25rem; text-align: center;
+    }
+    .erro-box p { font-size: 14px; color: var(--vermelho); margin-bottom: 1rem; font-weight: 500; }
+
+    @keyframes spin    { to { transform: rotate(360deg); } }
+    @keyframes fadeUp  { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-badge">⚡ Reforma Tributária 2026</div>
+  <h1>Sua empresa precisa<br>agir agora?</h1>
+  <p>10 perguntas · 3 minutos · resultado na hora</p>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-meta">
+    <span id="step-label">Identificação</span>
+    <span id="step-count"></span>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="prog" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="card">
+    <div id="form-area"></div>
+  </div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+const supabase = createClient(
+  'https://duuavlthmjnmaxixrtwi.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1dWF2bHRobWpubWF4aXhydHdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODYzMjksImV4cCI6MjA5MzY2MjMyOX0.lNbuDtPcOiG2oYPL7C8U9gzGz3tPymPu3MlHUVVRd38'
+)
+
+// ── PERGUNTAS ───────────────────────────────────────────────
+const STEPS = [
+  { id:'regime', peso:3, label:'Qual o regime tributário da sua empresa?',
+    sub:'Essa resposta define quando e como a reforma vai te afetar.',
+    opts:[
+      { v:'mei',             t:'MEI — Microempreendedor Individual', score:0.05 },
+      { v:'simples',         t:'Simples Nacional',                   score:0.20 },
+      { v:'lucro_presumido', t:'Lucro Presumido',                    score:0.85 },
+      { v:'lucro_real',      t:'Lucro Real',                         score:1.00 },
+      { v:'nao_sei',         t:'Não sei qual é o meu regime',        score:0.70 },
+    ]},
+  { id:'faturamento', peso:2.5, label:'Qual o faturamento anual da sua empresa?',
+    sub:'MEI e Simples com faturamento baixo têm mais tempo para se adaptar.',
+    opts:[
+      { v:'ate_81k',   t:'Até R$ 81 mil (MEI)',                  score:0.00 },
+      { v:'ate_360k',  t:'De R$ 81 mil a R$ 360 mil',            score:0.10 },
+      { v:'ate_4_8m',  t:'De R$ 360 mil a R$ 4,8 milhões',       score:0.35 },
+      { v:'ate_78m',   t:'De R$ 4,8 milhões a R$ 78 milhões',    score:0.90 },
+      { v:'acima_78m', t:'Acima de R$ 78 milhões',               score:1.00 },
+    ]},
+  { id:'setor', peso:1, label:'Em qual setor sua empresa atua?',
+    sub:'O setor define quais tributos mudam para você (ISS, ICMS, IPI…).',
+    opts:[
+      { v:'servicos',   t:'Serviços (TI, saúde, consultoria, educação…)', score:0.50 },
+      { v:'industria',  t:'Indústria / Manufatura',                        score:0.65 },
+      { v:'construcao', t:'Construção Civil',                               score:0.60 },
+      { v:'comercio',   t:'Comércio (revenda de produtos)',                 score:0.35 },
+      { v:'agro',       t:'Agronegócio / Rural',                            score:0.10 },
+    ]},
+  { id:'emite_nf', peso:1.5, label:'Sua empresa emite Nota Fiscal de Serviço (NFS-e)?',
+    sub:'O split payment (retenção automática do imposto) começa em 2026 — afeta principalmente quem emite NFS-e fora do Simples.',
+    opts:[
+      { v:'sim_sempre',   t:'Sim, sempre emito NFS-e',          score:0.60 },
+      { v:'sim_as_vezes', t:'Às vezes (misto de NF-e e NFS-e)', score:0.40 },
+      { v:'nao',          t:'Não, emito NF-e de produto',       score:0.20 },
+      { v:'nao_emito',    t:'Não emito nota fiscal',            score:0.30 },
+    ]},
+  { id:'conhece_reforma', peso:1, label:'O quanto você conhece sobre o que muda na reforma para sua empresa?',
+    opts:[
+      { v:'muito',    t:'Conheço bem — já estamos nos adaptando',          score:0.00 },
+      { v:'um_pouco', t:'Ouvi falar, mas não entendo os detalhes',         score:0.50 },
+      { v:'nada',     t:'Nunca ouvi falar ou não sei o que muda para mim', score:0.80 },
+    ]},
+  { id:'assessoria', peso:1, label:'Sua empresa tem contador ou assessoria orientando sobre a reforma?',
+    opts:[
+      { v:'sim_esp',   t:'Sim, contador especializado já nos orienta',        score:0.00 },
+      { v:'sim_geral', t:'Tenho contador, mas ele não falou sobre a reforma', score:0.60 },
+      { v:'nao',       t:'Não tenho contador / cuido eu mesmo',              score:0.85 },
+    ]},
+  { id:'sistema_fiscal', peso:0.75, label:'Qual sistema usa para emitir notas e calcular impostos?',
+    opts:[
+      { v:'erp_ok',    t:'Software de gestão com atualização contratada',       score:0.00 },
+      { v:'erp_dunno', t:'Software de gestão, mas sem saber se será atualizado', score:0.55 },
+      { v:'planilha',  t:'Planilhas / controle manual',                          score:0.75 },
+      { v:'contador',  t:'Meu contador cuida de tudo',                           score:0.25 },
+    ]},
+  { id:'creditos', peso:0.75, label:'Sua empresa acumula créditos de ICMS ou PIS/COFINS?',
+    sub:'Créditos acumulados precisam ser aproveitados antes da transição completa.',
+    opts:[
+      { v:'sim_grande', t:'Sim, créditos relevantes (acima de R$ 50 mil)', score:0.90 },
+      { v:'sim_pouco',  t:'Sim, mas valores pequenos',                      score:0.30 },
+      { v:'nao',        t:'Não acumulamos créditos',                        score:0.00 },
+      { v:'nao_sei',    t:'Não sei se temos',                               score:0.60 },
+    ]},
+  { id:'simulou_preco', peso:0.75, label:'Você já avaliou se a reforma vai mudar o preço dos seus produtos ou serviços?',
+    sub:'Alguns setores pagarão menos imposto, outros mais. Vale saber antes.',
+    opts:[
+      { v:'sim',          t:'Sim, já analisamos o impacto',   score:0.00 },
+      { v:'em_andamento', t:'Estamos analisando agora',        score:0.25 },
+      { v:'nao',          t:'Ainda não, mas pretendemos',      score:0.60 },
+      { v:'nao_sabia',    t:'Não sabia que isso poderia mudar',score:0.80 },
+    ]},
+  { id:'quando_agir', peso:0.75, label:'Quando você planeja começar a se adaptar à reforma?',
+    opts:[
+      { v:'ja',          t:'Já comecei — estou me adaptando', score:0.00 },
+      { v:'esse_ano',    t:'Ainda em 2025',                   score:0.15 },
+      { v:'ano_que_vem', t:'Em 2026',                         score:0.50 },
+      { v:'obrigatorio', t:'Só quando for obrigatório',       score:0.80 },
+      { v:'nao_pensei',  t:'Ainda não pensei nisso',          score:0.95 },
+    ]},
+]
+
+// ── ESTADO ──────────────────────────────────────────────────
+let userData = {}, answers = {}, history = [], idx = -1
+
+function activeSteps() {
+  return STEPS.filter(s => !s.condition || s.condition(answers))
+}
+
+// ── PROGRESSO ───────────────────────────────────────────────
+function updateProg() {
+  const steps = activeSteps(), total = steps.length, cur = idx + 1
+  document.getElementById('prog').style.width = Math.round(cur/total*100) + '%'
+  const s = steps[idx]
+  document.getElementById('step-label').textContent = s ? `Pergunta ${cur} de ${total}` : 'Identificação'
+  document.getElementById('step-count').textContent  = s ? `${cur}/${total}` : ''
+}
+
+// ── RENDER DADOS ─────────────────────────────────────────────
+function renderDados() {
+  document.getElementById('prog').style.width = '0%'
+  document.getElementById('step-label').textContent = 'Identificação'
+  document.getElementById('step-count').textContent = ''
+  document.getElementById('form-area').innerHTML = `
+    <div class="dados-topo">
+      <div class="dados-icone">
+        <svg width="20" height="20" fill="none" stroke="#005EB8" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>
+      <div>
+        <h2>Antes de começar</h2>
+        <p>Preencha seus dados para salvar o diagnóstico</p>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Seu nome</label>
+      <input type="text" id="inp-nome" placeholder="Ex: João Silva" autocomplete="name" />
+    </div>
+    <div class="form-group">
+      <label>Nome da empresa</label>
+      <input type="text" id="inp-empresa" placeholder="Ex: Empresa Ltda." autocomplete="organization" />
+    </div>
+    <div class="form-group">
+      <label>WhatsApp ou e-mail</label>
+      <input type="text" id="inp-contato" placeholder="(85) 99999-0000 ou email@empresa.com" autocomplete="email" />
+    </div>
+    <div class="nav">
+      <button class="btn-next" onclick="startQuiz()">
+        Iniciar diagnóstico
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  `
+}
+
+// ── RENDER PERGUNTA ──────────────────────────────────────────
+function renderQ() {
+  const steps = activeSteps(), s = steps[idx]
+  if (!s) return
+  updateProg()
+  const num = idx + 1
+  let html = `<div class="q-num">Pergunta ${num}</div>`
+  html += `<div class="q-label">${s.label}</div>`
+  if (s.sub) html += `<div class="q-sub">${s.sub}</div>`
+  else html += `<div style="margin-bottom:1.25rem"></div>`
+  html += `<div class="options">`
+  s.opts.forEach(o => {
+    const sel = answers[s.id] === o.v ? 'selected' : ''
+    html += `<div class="opt ${sel}" onclick="pick('${s.id}','${o.v}',this)">
+      <div class="opt-radio"></div>
+      <span class="opt-text">${o.t}</span>
+    </div>`
+  })
+  html += `</div><div class="nav">`
+  html += `<button class="btn-back" onclick="back()">← Voltar</button>`
+  const isLast = idx === steps.length - 1
+  html += `<button class="btn-next" id="btn-next" onclick="${isLast?'finish()':'next()'}" ${answers[s.id]!==undefined?'':'disabled'}>
+    ${isLast ? 'Ver resultado' : 'Próxima'}
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </button></div>`
+  document.getElementById('form-area').innerHTML = html
+}
+
+// ── AÇÕES ────────────────────────────────────────────────────
+window.startQuiz = () => {
+  const nome    = document.getElementById('inp-nome').value.trim()
+  const empresa = document.getElementById('inp-empresa').value.trim()
+  const contato = document.getElementById('inp-contato').value.trim()
+  if (!nome || !empresa || !contato) { alert('Preencha todos os campos.'); return }
+  userData = { nome, empresa, contato }
+  idx = 0; history = []
+  renderQ()
+}
+
+window.pick = (id, val, el) => {
+  answers[id] = val
+  document.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'))
+  el.classList.add('selected')
+  const btn = document.getElementById('btn-next')
+  if (btn) btn.disabled = false
+}
+
+window.next = () => {
+  const steps = activeSteps(), s = steps[idx]
+  if (!s || answers[s.id] === undefined) return
+  history.push(idx)
+  idx++
+  if (idx >= steps.length) { finish(); return }
+  renderQ()
+}
+
+window.back = () => {
+  if (history.length === 0) { idx = -1; renderDados(); return }
+  idx = history.pop()
+  renderQ()
+}
+
+// ── SCORE ────────────────────────────────────────────────────
+function calcScore() {
+  let sum = 0, totalPeso = 0
+  STEPS.forEach(s => {
+    const val = answers[s.id]
+    if (!val || !s.opts) return
+    const opt = s.opts.find(o => o.v === val)
+    if (!opt) return
+    sum += opt.score * s.peso
+    totalPeso += s.peso
+  })
+  const pct = totalPeso > 0 ? Math.round(sum / totalPeso * 100) : 0
+  const urgencia = pct >= 60 ? 'ALTO' : pct >= 30 ? 'MEDIO' : 'BAIXO'
+
+  const alertas = []
+  if (['lucro_presumido','lucro_real'].includes(answers.regime)) alertas.push('regime_complexo')
+  if (['ate_78m','acima_78m'].includes(answers.faturamento)) alertas.push('faturamento_alto')
+  if (answers.emite_nf === 'sim_sempre') alertas.push('split_payment')
+  if (answers.conhece_reforma === 'nada') alertas.push('desconhece')
+  if (answers.assessoria === 'nao') alertas.push('sem_contador')
+  if (answers.creditos === 'sim_grande') alertas.push('creditos')
+  if (answers.sistema_fiscal === 'planilha') alertas.push('sem_sistema')
+
+  return { pct, urgencia, alertas }
+}
+
+// ── DIAGNÓSTICO LOCAL (fallback sem IA) ──────────────────────
+function diagLocal(urgencia, pct) {
+  const r = answers.regime || ''
+  const f = answers.faturamento || ''
+  const isMEI  = r === 'mei'
+  const isSN   = r === 'simples'
+  const isLP   = r === 'lucro_presumido'
+  const isLR   = r === 'lucro_real'
+  const fatAlto = ['ate_78m','acima_78m'].includes(f)
+  const naoSabe = r === 'nao_sei'
+
+  if (isMEI) return {
+    resumo: `${userData.empresa} é MEI — impacto mínimo por enquanto. Sem urgência.`,
+    diagnostico: `Como MEI, você está fora do radar imediato da reforma. As mudanças que afetam o MEI estão previstas para ser discutidas somente entre 2029 e 2033, dentro do calendário gradual da LC 214/2025.\n\nO único ponto para monitorar: se você emite NFS-e, o split payment começa em 2026, mas o impacto no caixa do MEI tende a ser pequeno, pois o DAS já unifica os tributos mensalmente.\n\nMantenha seu DAS em dia e converse com seu contador em 2026 para confirmar se há novidades. Por enquanto, você pode respirar com tranquilidade.`
+  }
+  if (isSN && !fatAlto) return {
+    resumo: `${userData.empresa} está no Simples — impacto gradual, ação necessária a partir de 2027.`,
+    diagnostico: `Empresas do Simples Nacional com faturamento de até R$ 4,8 milhões têm prazo mais folgado. A transição para CBS/IBS no Simples ocorre de forma escalonada entre 2027 e 2029, conforme a Resolução CGSN 186/2026.\n\nO ponto mais próximo é o split payment para NFS-e (2026), mas para o Simples o impacto no caixa é menor. Vale conversar com seu contador ainda em 2025 para entender se há benefícios a aproveitar.\n\nNão há urgência imediata, mas use 2025 para se informar e mapear o impacto estimado. Quem chega preparado em 2027 sai na frente.`
+  }
+  if (isSN && fatAlto) return {
+    resumo: `${userData.empresa} está no topo do Simples — comece a se preparar agora para 2026.`,
+    diagnostico: `Com faturamento acima de R$ 4,8 milhões, sua empresa sentirá os efeitos da reforma mais cedo. O split payment para NFS-e começa em 2026 e pode afetar o seu fluxo de caixa se você presta serviços.\n\nA ação mais importante agora é simular com seu contador o impacto da alíquota efetiva do IBS/CBS no seu setor e avaliar se vale manter o Simples ou migrar para Lucro Presumido antes da transição compulsória.\n\nNão deixe para 2026 — inicie essa conversa com seu contador nos próximos 90 dias.`
+  }
+  if (isLP || isLR) return {
+    resumo: `${userData.empresa} está no ${isLR?'Lucro Real':'Lucro Presumido'} — ação urgente. A reforma já começa em 2026.`,
+    diagnostico: `Empresas no Lucro Presumido e Lucro Real são as mais impactadas. O split payment para NFS-e começa em 2026, e a CBS (substituta do PIS/COFINS) entra em 2027, mudando diretamente seu fluxo de caixa.\n\nAs ações prioritárias para os próximos 90 dias: (1) simular o impacto das novas alíquotas CBS/IBS com um contador especializado; (2) revisar contratos com clientes e fornecedores incluindo cláusulas de reajuste tributário; (3) confirmar com seu fornecedor de ERP se o sistema estará pronto para as novas obrigações.\n\nEmpresas que iniciarem a adaptação agora terão vantagem competitiva e evitarão surpresas no caixa em 2026.`
+  }
+  return {
+    resumo: `${userData.empresa} precisa identificar o regime tributário urgente — isso define tudo.`,
+    diagnostico: `O primeiro passo é descobrir qual é o seu regime: MEI, Simples, Lucro Presumido ou Lucro Real. Essa informação define completamente quando e como a reforma vai te afetar — de impacto mínimo (MEI) a urgência alta (Lucro Presumido/Real).\n\nConsulte seu contador ou acesse o portal da Receita Federal com seu CNPJ. Se não tiver contador, este é o momento de contratar — o custo de uma assessoria é muito menor que o risco de ser pego de surpresa.\n\nAssim que souber o regime, refaça esse diagnóstico para ter uma análise precisa.`
+  }
+}
+
+// ── FINISH ───────────────────────────────────────────────────
+window.finish = async () => {
+  const { pct, urgencia, alertas } = calcScore()
+
+  document.getElementById('prog').style.width = '100%'
+  document.getElementById('step-label').textContent = 'Gerando diagnóstico…'
+  document.getElementById('step-count').textContent = ''
+  document.getElementById('form-area').innerHTML = `
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <strong>Analisando suas respostas…</strong>
+      <p>Isso leva alguns segundos</p>
+    </div>`
+
+  // Monta contexto para IA
+  const respostasTexto = STEPS.filter(s => answers[s.id]).map(s => {
+    const opt = s.opts.find(o => o.v === answers[s.id])
+    return `- ${s.label}: ${opt ? opt.t : answers[s.id]}`
+  }).join('\n')
+
+  const alertasMap = {
+    regime_complexo: 'Regime Lucro Presumido/Real — CBS/IBS já em 2026',
+    faturamento_alto:'Faturamento acima de R$ 4,8mi — impacto imediato',
+    split_payment:   'Emite NFS-e — split payment em 2026 afeta o caixa',
+    desconhece:      'Não conhece a reforma — risco de ser pego de surpresa',
+    sem_contador:    'Sem assessoria tributária',
+    creditos:        'Créditos fiscais relevantes a mapear',
+    sem_sistema:     'Usa planilhas — sistema não atualiza automaticamente',
+  }
+
+  const regimeCtx = {
+    mei:             'MEI — reforma tem impacto mínimo, mudanças só após 2029',
+    simples:         'Simples Nacional — transição gradual entre 2027-2029',
+    lucro_presumido: 'Lucro Presumido — CBS/IBS já em 2026, impacto alto',
+    lucro_real:      'Lucro Real — CBS/IBS já em 2026, máximo impacto',
+    nao_sei:         'Regime desconhecido — precisa identificar urgente',
+  }[answers.regime] || answers.regime
+
+  const prompt = `Você é especialista em reforma tributária brasileira (EC 132/2023, LC 214/2025, CGSN 186/2026).
+Contexto: evento empresarial — linguagem direta e acessível para donos de empresa, sem juridiquês.
+
+Empresa: ${userData.empresa} (${userData.nome})
+Regime: ${regimeCtx}
+Setor: ${answers.setor} | Faturamento: ${answers.faturamento}
+Score de risco: ${pct}/100
+Alertas: ${alertas.map(a => alertasMap[a]||a).join('; ') || 'nenhum'}
+
+Respostas: ${respostasTexto}
+
+REGRA DE PRECISÃO (siga rigorosamente):
+- MEI com faturamento até R$81k: impacto MÍNIMO. NÃO classifique como urgente.
+- Simples até R$4,8mi: impacto BAIXO. Prazo 2027-2029.
+- Simples acima R$4,8mi: impacto MODERADO. Split payment em 2026.
+- Lucro Presumido/Real: impacto ALTO e IMEDIATO. CBS/IBS em 2026-2027.
+- Agronegócio: amplamente isento. Impacto baixo.
+
+Escreva EXATAMENTE 3 parágrafos curtos (máximo 3 linhas cada):
+1. Veredito honesto e personalizado ao regime/setor desta empresa
+2. O que fazer AGORA (proporcional ao nível real de risco)
+3. O que acontece nos próximos 12-24 meses para essa empresa
+
+Responda SOMENTE com JSON válido:
+{"resumo":"veredito em 1 linha direta","diagnostico":"par1\\n\\npar2\\n\\npar3"}`
+
+  let parsed
+  try {
+    // Tenta função serverless (Vercel)
+    try {
+      const r = await fetch('/api/diagnostico', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ prompt })
+      })
+      if (r.ok) parsed = await r.json()
+    } catch(_) {}
+
+    // Fallback: chama Anthropic direto
+    if (!parsed) {
+      const r2 = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'anthropic-dangerous-direct-browser-access': 'true',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514', max_tokens: 800,
+          messages: [{ role:'user', content: prompt }]
+        })
+      })
+      if (r2.ok) {
+        const d = await r2.json()
+        const t = d.content?.map(i=>i.text||'').join('') || ''
+        parsed = JSON.parse(t.replace(/```json|```/g,'').trim())
+      }
+    }
+  } catch(_) {}
+
+  // Fallback local sem IA
+  if (!parsed) parsed = diagLocal(urgencia, pct)
+
+  // Salva no Supabase
+  const rOpt = STEPS.find(s=>s.id==='regime')?.opts?.find(o=>o.v===answers.regime)
+  const fOpt = STEPS.find(s=>s.id==='faturamento')?.opts?.find(o=>o.v===answers.faturamento)
+  const sOpt = STEPS.find(s=>s.id==='setor')?.opts?.find(o=>o.v===answers.setor)
+
+  const { error: dbErr } = await supabase.from('diagnosticos').insert({
+    nome:        userData.nome,
+    empresa:     userData.empresa,
+    contato:     userData.contato,
+    urgencia,
+    score_total: pct,
+    resumo:      parsed.resumo,
+    diagnostico: parsed.diagnostico,
+    regime:      rOpt?.t || answers.regime,
+    faturamento: fOpt?.t || answers.faturamento,
+    setor:       sOpt?.t || answers.setor,
+    respostas:   answers,
+  })
+  if (dbErr) console.error('Supabase:', dbErr)
+
+  // Renderiza resultado
+  const emoji  = urgencia==='ALTO' ? '⚠️' : urgencia==='MEDIO' ? '👀' : '✅'
+  const nivel  = urgencia==='ALTO' ? 'Precisa agir agora' : urgencia==='MEDIO' ? 'Fique de olho' : 'Tranquilo por enquanto'
+
+  document.getElementById('form-area').innerHTML = `
+    ${!dbErr ? '<div class="saved-ok"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Diagnóstico salvo com sucesso</div>' : ''}
+    <div class="veredito ${urgencia}">
+      <div class="veredito-emoji">${emoji}</div>
+      <div class="veredito-nivel">${nivel}</div>
+      <div class="veredito-resumo">${parsed.resumo}</div>
+      <div class="veredito-score">Score de risco: ${pct}/100</div>
+    </div>
+    <div class="diag-titulo">Análise detalhada</div>
+    <div class="diag-texto">${parsed.diagnostico}</div>
+    <button class="btn-restart" onclick="location.reload()">↺ Fazer novo diagnóstico</button>
+  `
+}
+
+// ── INIT ─────────────────────────────────────────────────────
+renderDados()
+</script>
+</body>
+</html>
