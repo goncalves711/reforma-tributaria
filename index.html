@@ -408,8 +408,10 @@
   </style>
 </head>
 <body>
+
 <div class="header">
-  <img src="https://raw.githubusercontent.com/goncalves711/reforma-tributaria/main/logo%20sebrae.jpg" alt="Sebrae" style="height:52px;margin-bottom:1rem;border-radius:6px;" />
+  <img src="https://raw.githubusercontent.com/goncalves711/reforma-tributaria/main/logo%20sebrae.jpg"
+       alt="Sebrae" style="height:52px;margin-bottom:1rem;border-radius:6px;" />
   <h1>Sua empresa precisa<br>agir agora?</h1>
   <p>10 perguntas · 3 minutos · resultado na hora</p>
 </div>
@@ -439,83 +441,112 @@ const supabase = createClient(
 
 // ── PERGUNTAS ───────────────────────────────────────────────
 const STEPS = [
-  { id:'regime', peso:3, label:'Qual o regime tributário da sua empresa?',
-    sub:'Essa resposta define quando e como a reforma vai te afetar.',
+  // P1 — Regime: gatilho automático para vermelho
+  { id:'regime', label:'Qual é o regime tributário atual da sua empresa?',
     opts:[
-      { v:'mei',             t:'MEI — Microempreendedor Individual', score:0.05 },
-      { v:'simples',         t:'Simples Nacional',                   score:0.20 },
-      { v:'lucro_presumido', t:'Lucro Presumido',                    score:0.85 },
-      { v:'lucro_real',      t:'Lucro Real',                         score:1.00 },
-      { v:'nao_sei',         t:'Não sei qual é o meu regime',        score:0.70 },
+      { v:'mei',             t:'MEI' },
+      { v:'simples',         t:'Simples Nacional' },
+      { v:'lucro_presumido', t:'Lucro Presumido' },
+      { v:'lucro_real',      t:'Lucro Real' },
+      { v:'nao_sei',         t:'Não sei' },
     ]},
-  { id:'faturamento', peso:2.5, label:'Qual o faturamento anual da sua empresa?',
-    sub:'MEI e Simples com faturamento baixo têm mais tempo para se adaptar.',
+
+  // P2 — Para quem vende
+  { id:'vende_para', label:'Para quem sua empresa vende mais?',
     opts:[
-      { v:'ate_81k',   t:'Até R$ 81 mil (MEI)',                  score:0.00 },
-      { v:'ate_360k',  t:'De R$ 81 mil a R$ 360 mil',            score:0.10 },
-      { v:'ate_4_8m',  t:'De R$ 360 mil a R$ 4,8 milhões',       score:0.35 },
-      { v:'ate_78m',   t:'De R$ 4,8 milhões a R$ 78 milhões',    score:0.90 },
-      { v:'acima_78m', t:'Acima de R$ 78 milhões',               score:1.00 },
+      { v:'pf',       t:'Principalmente para consumidor final pessoa física' },
+      { v:'misto',    t:'Para pessoa física e CNPJ, meio a meio' },
+      { v:'pj',       t:'Principalmente para empresas (CNPJ)' },
+      { v:'pj_grande',t:'Principalmente para empresas grandes ou contribuintes do regime normal' },
     ]},
-  { id:'setor', peso:1, label:'Em qual setor sua empresa atua?',
-    sub:'O setor define quais tributos mudam para você (ISS, ICMS, IPI…).',
+
+  // P3 — Clientes pedem informações fiscais
+  { id:'cliente_fiscal', label:'Seus clientes costumam pedir informações fiscais, destaque de imposto ou crédito tributário?',
     opts:[
-      { v:'servicos',   t:'Serviços (TI, saúde, consultoria, educação…)', score:0.50 },
-      { v:'industria',  t:'Indústria / Manufatura',                        score:0.65 },
-      { v:'construcao', t:'Construção Civil',                               score:0.60 },
-      { v:'comercio',   t:'Comércio (revenda de produtos)',                 score:0.35 },
-      { v:'agro',       t:'Agronegócio / Rural',                            score:0.10 },
+      { v:'nunca',       t:'Nunca' },
+      { v:'as_vezes',    t:'Às vezes' },
+      { v:'frequente',   t:'Frequentemente' },
+      { v:'nao_sei',     t:'Não sei' },
     ]},
-  { id:'emite_nf', peso:1.5, label:'Sua empresa emite Nota Fiscal de Serviço (NFS-e)?',
-    sub:'O split payment (retenção automática do imposto) começa em 2026 — afeta principalmente quem emite NFS-e fora do Simples.',
+
+  // P4 — Compras de insumos
+  { id:'compras_insumos', label:'Sua empresa compra muitos insumos, mercadorias ou serviços para conseguir vender?',
     opts:[
-      { v:'sim_sempre',   t:'Sim, sempre emito NFS-e',          score:0.60 },
-      { v:'sim_as_vezes', t:'Às vezes (misto de NF-e e NFS-e)', score:0.40 },
-      { v:'nao',          t:'Não, emito NF-e de produto',       score:0.20 },
-      { v:'nao_emito',    t:'Não emito nota fiscal',            score:0.30 },
+      { v:'nao',         t:'Não, meu custo principal é mão de obra ou atividade pessoal' },
+      { v:'pouco',       t:'Sim, mas o custo é baixo em relação ao faturamento' },
+      { v:'bastante',    t:'Sim, compro bastante mercadoria, insumo ou serviço' },
+      { v:'grande_parte',t:'Sim, minhas compras representam grande parte do preço final' },
     ]},
-  { id:'conhece_reforma', peso:1, label:'O quanto você conhece sobre o que muda na reforma para sua empresa?',
+
+  // P5 — Segmento
+  { id:'segmento', label:'Qual é o segmento principal da empresa?',
     opts:[
-      { v:'muito',    t:'Conheço bem — já estamos nos adaptando',          score:0.00 },
-      { v:'um_pouco', t:'Ouvi falar, mas não entendo os detalhes',         score:0.50 },
-      { v:'nada',     t:'Nunca ouvi falar ou não sei o que muda para mim', score:0.80 },
+      { v:'servico_pf',  t:'Serviço simples para pessoa física' },
+      { v:'comercio_pf', t:'Comércio varejista para consumidor final' },
+      { v:'servico_pj',  t:'Serviço para empresas (B2B)' },
+      { v:'industria',   t:'Indústria' },
+      { v:'atacado',     t:'Atacado ou distribuição' },
+      { v:'construcao',  t:'Construção, incorporação ou atividade imobiliária' },
+      { v:'especifico',  t:'Restaurante, alimentação, saúde, educação ou setor com regra específica' },
     ]},
-  { id:'assessoria', peso:1, label:'Sua empresa tem contador ou assessoria orientando sobre a reforma?',
+
+  // P6 — Margens
+  { id:'margem', label:'Sua empresa trabalha com margens apertadas?',
     opts:[
-      { v:'sim_esp',   t:'Sim, contador especializado já nos orienta',        score:0.00 },
-      { v:'sim_geral', t:'Tenho contador, mas ele não falou sobre a reforma', score:0.60 },
-      { v:'nao',       t:'Não tenho contador / cuido eu mesmo',              score:0.85 },
+      { v:'nao',      t:'Não, tenho boa margem' },
+      { v:'sim',      t:'Sim, minha margem é pequena' },
+      { v:'nao_sei',  t:'Não sei calcular minha margem' },
+      { v:'variavel', t:'Vario muito de produto para produto ou de contrato para contrato' },
     ]},
-  { id:'sistema_fiscal', peso:0.75, label:'Qual sistema usa para emitir notas e calcular impostos?',
+
+  // P7 — Contratos longos
+  { id:'contratos', label:'Sua empresa tem contratos de venda ou prestação de serviço com prazo médio ou longo?',
     opts:[
-      { v:'erp_ok',    t:'Software de gestão com atualização contratada',       score:0.00 },
-      { v:'erp_dunno', t:'Software de gestão, mas sem saber se será atualizado', score:0.55 },
-      { v:'planilha',  t:'Planilhas / controle manual',                          score:0.75 },
-      { v:'contador',  t:'Meu contador cuida de tudo',                           score:0.25 },
+      { v:'nao',        t:'Não' },
+      { v:'sim_flexivel',t:'Sim, mas consigo reajustar preço com facilidade' },
+      { v:'sim_medio',  t:'Sim, contratos de 6 a 12 meses' },
+      { v:'sim_longo',  t:'Sim, contratos acima de 12 meses ou com preço travado' },
     ]},
-  { id:'creditos', peso:0.75, label:'Sua empresa acumula créditos de ICMS ou PIS/COFINS?',
-    sub:'Créditos acumulados precisam ser aproveitados antes da transição completa.',
+
+  // P8 — Cláusula de reequilíbrio
+  { id:'clausula', label:'Seus contratos atuais têm cláusula de reequilíbrio econômico por mudança tributária?',
+    sub:'Contratos sem essa cláusula podem gerar prejuízo se a carga tributária mudar.',
     opts:[
-      { v:'sim_grande', t:'Sim, créditos relevantes (acima de R$ 50 mil)', score:0.90 },
-      { v:'sim_pouco',  t:'Sim, mas valores pequenos',                      score:0.30 },
-      { v:'nao',        t:'Não acumulamos créditos',                        score:0.00 },
-      { v:'nao_sei',    t:'Não sei se temos',                               score:0.60 },
+      { v:'sim',      t:'Sim' },
+      { v:'nao',      t:'Não' },
+      { v:'nao_sei',  t:'Não sei' },
+      { v:'sem_cont', t:'Não tenho contratos formais' },
     ]},
-  { id:'simulou_preco', peso:0.75, label:'Você já avaliou se a reforma vai mudar o preço dos seus produtos ou serviços?',
-    sub:'Alguns setores pagarão menos imposto, outros mais. Vale saber antes.',
+
+  // P9 — Limite do Simples
+  { id:'limite_simples', label:'Sua empresa está próxima dos limites do Simples Nacional?',
+    sub:'Empresas próximas dos limites precisam simular permanência no Simples ou migração.',
     opts:[
-      { v:'sim',          t:'Sim, já analisamos o impacto',   score:0.00 },
-      { v:'em_andamento', t:'Estamos analisando agora',        score:0.25 },
-      { v:'nao',          t:'Ainda não, mas pretendemos',      score:0.60 },
-      { v:'nao_sabia',    t:'Não sabia que isso poderia mudar',score:0.80 },
+      { v:'longe',    t:'Não, fatura bem abaixo dos limites' },
+      { v:'crescendo',t:'Está crescendo, mas ainda longe dos limites' },
+      { v:'proximo_36',t:'Está próxima de R$ 3,6 milhões por ano' },
+      { v:'proximo_48',t:'Está próxima de R$ 4,8 milhões por ano' },
+      { v:'nao_sei',  t:'Não sei' },
+      { v:'na',       t:'Não estou no Simples' },
     ]},
-  { id:'quando_agir', peso:0.75, label:'Quando você planeja começar a se adaptar à reforma?',
+
+  // P10 — IBS/CBS dentro ou fora do Simples
+  { id:'ibs_simples', label:'Você sabe se, em 2027, sua empresa deve recolher IBS/CBS dentro do Simples ou pelo regime regular?',
+    sub:'Essa escolha pode afetar preço, crédito para clientes e competitividade.',
     opts:[
-      { v:'ja',          t:'Já comecei — estou me adaptando', score:0.00 },
-      { v:'esse_ano',    t:'Ainda em 2025',                   score:0.15 },
-      { v:'ano_que_vem', t:'Em 2026',                         score:0.50 },
-      { v:'obrigatorio', t:'Só quando for obrigatório',       score:0.80 },
-      { v:'nao_pensei',  t:'Ainda não pensei nisso',          score:0.95 },
+      { v:'sim',        t:'Sim, já analisei com contador ou consultor' },
+      { v:'ainda_nao',  t:'Ainda não analisei' },
+      { v:'nem_sabia',  t:'Nem sabia que existia essa opção' },
+      { v:'nao_simples',t:'Minha empresa não é do Simples' },
+    ]},
+
+  // P11 — Já conversou com contador
+  { id:'contador', label:'Você já conversou com seu contador sobre os impactos da Reforma Tributária?',
+    opts:[
+      { v:'sim_simulacao', t:'Sim, já tenho simulação' },
+      { v:'sim_sem_num',   t:'Já conversei, mas ainda sem números' },
+      { v:'ainda_nao',     t:'Ainda não conversei' },
+      { v:'sem_contador',  t:'Não tenho contador ou não sei quem pode ajudar' },
     ]},
 ]
 
@@ -637,67 +668,87 @@ window.back = () => {
 }
 
 // ── SCORE ────────────────────────────────────────────────────
+// Resultado: VERMELHO / AMARELO / VERDE
 function calcScore() {
-  let sum = 0, totalPeso = 0
-  STEPS.forEach(s => {
-    const val = answers[s.id]
-    if (!val || !s.opts) return
-    const opt = s.opts.find(o => o.v === val)
-    if (!opt) return
-    sum += opt.score * s.peso
-    totalPeso += s.peso
-  })
-  const pct = totalPeso > 0 ? Math.round(sum / totalPeso * 100) : 0
-  const urgencia = pct >= 60 ? 'ALTO' : pct >= 30 ? 'MEDIO' : 'BAIXO'
+  const r  = answers.regime        || ''
+  const vp = answers.vende_para    || ''
+  const sg = answers.segmento      || ''
+  const mg = answers.margem        || ''
+  const ct = answers.contratos     || ''
+  const cl = answers.clausula      || ''
+  const ls = answers.limite_simples|| ''
+  const ib = answers.ibs_simples   || ''
+  const cf = answers.cliente_fiscal|| ''
+  const co = answers.contador      || ''
+  const ci = answers.compras_insumos||''
 
-  const alertas = []
-  if (['lucro_presumido','lucro_real'].includes(answers.regime)) alertas.push('regime_complexo')
-  if (['ate_78m','acima_78m'].includes(answers.faturamento)) alertas.push('faturamento_alto')
-  if (answers.emite_nf === 'sim_sempre') alertas.push('split_payment')
-  if (answers.conhece_reforma === 'nada') alertas.push('desconhece')
-  if (answers.assessoria === 'nao') alertas.push('sem_contador')
-  if (answers.creditos === 'sim_grande') alertas.push('creditos')
-  if (answers.sistema_fiscal === 'planilha') alertas.push('sem_sistema')
+  // ── REGRAS AUTOMÁTICAS VERMELHO ──────────────────────────
+  // 1. Lucro Presumido ou Real → vermelho direto
+  if (['lucro_presumido','lucro_real'].includes(r)) return { resultado:'VERMELHO', pct:90 }
 
-  return { pct, urgencia, alertas }
+  // 2. Indústria/atacado/B2B com margem apertada → vermelho
+  if (['industria','atacado'].includes(sg) && ['pj','pj_grande'].includes(vp) && mg === 'sim') return { resultado:'VERMELHO', pct:85 }
+
+  // 3. Contratos longos sem cláusula de reequilíbrio e vende para CNPJ
+  if (['sim_medio','sim_longo'].includes(ct) && ['nao','nao_sei'].includes(cl) && ['pj','pj_grande'].includes(vp)) return { resultado:'VERMELHO', pct:80 }
+
+  // 4. Próximo do limite do Simples sem simulação
+  if (['proximo_36','proximo_48'].includes(ls) && ['ainda_nao','nem_sabia'].includes(ib)) return { resultado:'VERMELHO', pct:80 }
+
+  // ── REGRAS AUTOMÁTICAS AMARELO (mínimo) ──────────────────
+  let amarelo = false
+
+  // Simples vendendo para CNPJ → amarelo
+  if (r === 'simples' && ['pj','pj_grande'].includes(vp)) amarelo = true
+
+  // Clientes FREQUENTEMENTE pedem crédito fiscal
+  if (cf === 'frequente') amarelo = true
+
+  // Simples + não sabe sobre IBS/CBS + vende para CNPJ
+  if (r === 'simples' && ['ainda_nao','nem_sabia'].includes(ib) && ['pj','pj_grande'].includes(vp)) amarelo = true
+
+  // Contratos médios/longos com CNPJ sem cláusula
+  if (['pj','pj_grande'].includes(vp) && ['nao','nao_sei'].includes(cl) && ['sim_medio','sim_longo'].includes(ct)) amarelo = true
+
+  // Compras = grande parte do custo + vende para CNPJ
+  if (ci === 'grande_parte' && ['pj','pj_grande'].includes(vp)) amarelo = true
+
+  // Segmento B2B ou indústria vendendo para CNPJ
+  if (['servico_pj','industria','atacado'].includes(sg) && ['pj','pj_grande'].includes(vp)) amarelo = true
+
+  // Próximo dos limites do Simples
+  if (['proximo_36','proximo_48'].includes(ls)) amarelo = true
+
+  if (amarelo) return { resultado:'AMARELO', pct:50 }
+
+  // ── VERDE ────────────────────────────────────────────────
+  return { resultado:'VERDE', pct:15 }
 }
 
 // ── DIAGNÓSTICO LOCAL (fallback sem IA) ──────────────────────
-function diagLocal(urgencia, pct) {
-  const r = answers.regime || ''
-  const f = answers.faturamento || ''
-  const isMEI  = r === 'mei'
-  const isSN   = r === 'simples'
-  const isLP   = r === 'lucro_presumido'
-  const isLR   = r === 'lucro_real'
-  const fatAlto = ['ate_78m','acima_78m'].includes(f)
-  const naoSabe = r === 'nao_sei'
-
-  if (isMEI) return {
-    resumo: `${userData.empresa} é MEI — impacto mínimo por enquanto. Sem urgência.`,
-    diagnostico: `Como MEI, você está fora do radar imediato da reforma. As mudanças que afetam o MEI estão previstas para ser discutidas somente entre 2029 e 2033, dentro do calendário gradual da LC 214/2025.\n\nO único ponto para monitorar: se você emite NFS-e, o split payment começa em 2026, mas o impacto no caixa do MEI tende a ser pequeno, pois o DAS já unifica os tributos mensalmente.\n\nMantenha seu DAS em dia e converse com seu contador em 2026 para confirmar se há novidades. Por enquanto, você pode respirar com tranquilidade.`
+function diagLocal(resultado) {
+  const textos = {
+    VERDE: {
+      resumo: `${userData.empresa} tem baixo impacto imediato com a Reforma Tributária.`,
+      diagnostico: `Sua empresa tende a ter baixo impacto imediato com a Reforma Tributária. Esse resultado é comum em MEIs e empresas do Simples Nacional que vendem principalmente para consumidor final pessoa física, têm operação simples, não dependem de créditos tributários e não possuem contratos longos com empresas.\n\nMesmo assim, é importante acompanhar as mudanças, manter o cadastro fiscal em ordem e conversar com o contador antes de 2027, principalmente se a empresa crescer, passar a vender para CNPJ ou mudar seu modelo de negócio.\n\nOrientação: acompanhe as novidades e revise o tema com seu contador ou com o Sebrae ao menos uma vez por ano.`
+    },
+    AMARELO: {
+      resumo: `${userData.empresa} precisa simular cenários antes dos prazos de 2026/2027.`,
+      diagnostico: `Sua empresa pode ser afetada pela Reforma Tributária, especialmente se vende para CNPJ, possui contratos, está crescendo, tem compras relevantes de mercadorias/insumos/serviços ou está avaliando permanecer no Simples Nacional.\n\nO ponto principal é avaliar se continuará no Simples Nacional com IBS/CBS dentro da guia única ou se fará sentido optar pelo recolhimento de IBS/CBS pelo regime regular. Essa escolha pode influenciar preço, crédito para clientes e competitividade.\n\nOrientação: procure a consultoria express do Sebrae ou seu contador e faça uma simulação antes dos prazos de opção de setembro de 2026.`
+    },
+    VERMELHO: {
+      resumo: `${userData.empresa} tem impacto direto provável — simulação tributária urgente.`,
+      diagnostico: `Sua empresa tem características que indicam risco alto de impacto direto com a Reforma Tributária. Esse resultado ocorre em empresas no Lucro Presumido ou Lucro Real, empresas que vendem para CNPJ, indústrias, atacadistas, distribuidoras, comércios B2B, empresas com margens apertadas, contratos longos ou próximas dos limites do Simples Nacional.\n\nNesses casos, a Reforma pode afetar preço, crédito tributário, contratos, margem, competitividade e escolha do regime tributário. A decisão não deve ser tomada apenas olhando o valor atual do imposto.\n\nOrientação: faça uma simulação tributária completa com contador ou consultoria do Sebrae especializada o quanto antes.`
+    }
   }
-  if (isSN && !fatAlto) return {
-    resumo: `${userData.empresa} está no Simples — impacto gradual, ação necessária a partir de 2027.`,
-    diagnostico: `Empresas do Simples Nacional com faturamento de até R$ 4,8 milhões têm prazo mais folgado. A transição para CBS/IBS no Simples ocorre de forma escalonada entre 2027 e 2029, conforme a Resolução CGSN 186/2026.\n\nO ponto mais próximo é o split payment para NFS-e (2026), mas para o Simples o impacto no caixa é menor. Vale conversar com seu contador ainda em 2025 para entender se há benefícios a aproveitar.\n\nNão há urgência imediata, mas use 2025 para se informar e mapear o impacto estimado. Quem chega preparado em 2027 sai na frente.`
-  }
-  if (isSN && fatAlto) return {
-    resumo: `${userData.empresa} está no topo do Simples — comece a se preparar agora para 2026.`,
-    diagnostico: `Com faturamento acima de R$ 4,8 milhões, sua empresa sentirá os efeitos da reforma mais cedo. O split payment para NFS-e começa em 2026 e pode afetar o seu fluxo de caixa se você presta serviços.\n\nA ação mais importante agora é simular com seu contador o impacto da alíquota efetiva do IBS/CBS no seu setor e avaliar se vale manter o Simples ou migrar para Lucro Presumido antes da transição compulsória.\n\nNão deixe para 2026 — inicie essa conversa com seu contador nos próximos 90 dias.`
-  }
-  if (isLP || isLR) return {
-    resumo: `${userData.empresa} está no ${isLR?'Lucro Real':'Lucro Presumido'} — ação urgente. A reforma já começa em 2026.`,
-    diagnostico: `Empresas no Lucro Presumido e Lucro Real são as mais impactadas. O split payment para NFS-e começa em 2026, e a CBS (substituta do PIS/COFINS) entra em 2027, mudando diretamente seu fluxo de caixa.\n\nAs ações prioritárias para os próximos 90 dias: (1) simular o impacto das novas alíquotas CBS/IBS com um contador especializado; (2) revisar contratos com clientes e fornecedores incluindo cláusulas de reajuste tributário; (3) confirmar com seu fornecedor de ERP se o sistema estará pronto para as novas obrigações.\n\nEmpresas que iniciarem a adaptação agora terão vantagem competitiva e evitarão surpresas no caixa em 2026.`
-  }
-  return {
-    resumo: `${userData.empresa} precisa identificar o regime tributário urgente — isso define tudo.`,
-    diagnostico: `O primeiro passo é descobrir qual é o seu regime: MEI, Simples, Lucro Presumido ou Lucro Real. Essa informação define completamente quando e como a reforma vai te afetar — de impacto mínimo (MEI) a urgência alta (Lucro Presumido/Real).\n\nConsulte seu contador ou acesse o portal da Receita Federal com seu CNPJ. Se não tiver contador, este é o momento de contratar — o custo de uma assessoria é muito menor que o risco de ser pego de surpresa.\n\nAssim que souber o regime, refaça esse diagnóstico para ter uma análise precisa.`
-  }
+  return textos[resultado] || textos.AMARELO
 }
 
 // ── FINISH ───────────────────────────────────────────────────
 window.finish = async () => {
-  const { pct, urgencia, alertas } = calcScore()
+  const { resultado, pct } = calcScore()
+  const urgencia = resultado  // VERMELHO/AMARELO/VERDE mapeado para DB como ALTO/MEDIO/BAIXO
+  const urgDB = resultado === 'VERMELHO' ? 'ALTO' : resultado === 'AMARELO' ? 'MEDIO' : 'BAIXO'
 
   document.getElementById('prog').style.width = '100%'
   document.getElementById('step-label').textContent = 'Gerando diagnóstico…'
@@ -715,47 +766,24 @@ window.finish = async () => {
     return `- ${s.label}: ${opt ? opt.t : answers[s.id]}`
   }).join('\n')
 
-  const alertasMap = {
-    regime_complexo: 'Regime Lucro Presumido/Real — CBS/IBS já em 2026',
-    faturamento_alto:'Faturamento acima de R$ 4,8mi — impacto imediato',
-    split_payment:   'Emite NFS-e — split payment em 2026 afeta o caixa',
-    desconhece:      'Não conhece a reforma — risco de ser pego de surpresa',
-    sem_contador:    'Sem assessoria tributária',
-    creditos:        'Créditos fiscais relevantes a mapear',
-    sem_sistema:     'Usa planilhas — sistema não atualiza automaticamente',
-  }
-
-  const regimeCtx = {
-    mei:             'MEI — reforma tem impacto mínimo, mudanças só após 2029',
-    simples:         'Simples Nacional — transição gradual entre 2027-2029',
-    lucro_presumido: 'Lucro Presumido — CBS/IBS já em 2026, impacto alto',
-    lucro_real:      'Lucro Real — CBS/IBS já em 2026, máximo impacto',
-    nao_sei:         'Regime desconhecido — precisa identificar urgente',
-  }[answers.regime] || answers.regime
-
   const prompt = `Você é especialista em reforma tributária brasileira (EC 132/2023, LC 214/2025, CGSN 186/2026).
-Contexto: evento empresarial — linguagem direta e acessível para donos de empresa, sem juridiquês.
+Contexto: evento do Sebrae — linguagem direta e acessível para donos de empresa, sem juridiquês.
 
 Empresa: ${userData.empresa} (${userData.nome})
-Regime: ${regimeCtx}
-Setor: ${answers.setor} | Faturamento: ${answers.faturamento}
-Score de risco: ${pct}/100
-Alertas: ${alertas.map(a => alertasMap[a]||a).join('; ') || 'nenhum'}
-
+Resultado do diagnóstico: ${resultado}
 Respostas: ${respostasTexto}
 
-REGRA DE PRECISÃO (siga rigorosamente):
-- MEI com faturamento até R$81k: impacto MÍNIMO. NÃO classifique como urgente.
-- Simples até R$4,8mi: impacto BAIXO. Prazo 2027-2029.
-- Simples acima R$4,8mi: impacto MODERADO. Split payment em 2026.
-- Lucro Presumido/Real: impacto ALTO e IMEDIATO. CBS/IBS em 2026-2027.
-- Agronegócio: amplamente isento. Impacto baixo.
+REGRAS DE CLASSIFICAÇÃO (aplique com rigor):
+- VERMELHO automático: Lucro Presumido, Lucro Real, indústria/atacado B2B com margem apertada, contratos longos sem cláusula de reequilíbrio vendendo para CNPJ, próximo dos limites do Simples sem simulação.
+- AMARELO automático: Simples vendendo para CNPJ, clientes que avaliam crédito tributário, sem saber se fica no Simples em 2027, contratos com CNPJ sem cláusula, compras relevantes de insumos/mercadorias.
+- VERDE: MEI ou Simples vendendo para pessoa física, operação simples, sem contratos longos com CNPJ.
 
-Escreva EXATAMENTE 3 parágrafos curtos (máximo 3 linhas cada):
-1. Veredito honesto e personalizado ao regime/setor desta empresa
-2. O que fazer AGORA (proporcional ao nível real de risco)
-3. O que acontece nos próximos 12-24 meses para essa empresa
+O resultado já foi calculado como ${resultado}. Escreva um diagnóstico personalizado com EXATAMENTE 3 parágrafos curtos (máximo 3 linhas cada):
+1. Por que essa empresa específica está nesse resultado, com base nas respostas dela
+2. O que ela deve fazer agora (proporcional ao resultado: Verde=acompanhar, Amarelo=simular, Vermelho=agir urgente)
+3. Datas e prazos relevantes: opção IBS/CBS no Simples: setembro/2026; CBS começa: 2027
 
+Orientação final deve mencionar o Sebrae como apoio.
 Responda SOMENTE com JSON válido:
 {"resumo":"veredito em 1 linha direta","diagnostico":"par1\\n\\npar2\\n\\npar3"}`
 
@@ -792,39 +820,42 @@ Responda SOMENTE com JSON válido:
   } catch(_) {}
 
   // Fallback local sem IA
-  if (!parsed) parsed = diagLocal(urgencia, pct)
+  if (!parsed) parsed = diagLocal(resultado)
 
   // Salva no Supabase
   const rOpt = STEPS.find(s=>s.id==='regime')?.opts?.find(o=>o.v===answers.regime)
-  const fOpt = STEPS.find(s=>s.id==='faturamento')?.opts?.find(o=>o.v===answers.faturamento)
-  const sOpt = STEPS.find(s=>s.id==='setor')?.opts?.find(o=>o.v===answers.setor)
+  const sgOpt= STEPS.find(s=>s.id==='segmento')?.opts?.find(o=>o.v===answers.segmento)
+  const vpOpt= STEPS.find(s=>s.id==='vende_para')?.opts?.find(o=>o.v===answers.vende_para)
 
   const { error: dbErr } = await supabase.from('diagnosticos').insert({
     nome:        userData.nome,
     empresa:     userData.empresa,
     contato:     userData.contato,
-    urgencia,
+    urgencia:    urgDB,
     score_total: pct,
     resumo:      parsed.resumo,
     diagnostico: parsed.diagnostico,
-    regime:      rOpt?.t || answers.regime,
-    faturamento: fOpt?.t || answers.faturamento,
-    setor:       sOpt?.t || answers.setor,
+    regime:      rOpt?.t  || answers.regime,
+    faturamento: vpOpt?.t || answers.vende_para,
+    setor:       sgOpt?.t || answers.segmento,
     respostas:   answers,
   })
   if (dbErr) console.error('Supabase:', dbErr)
 
   // Renderiza resultado
-  const emoji  = urgencia==='ALTO' ? '⚠️' : urgencia==='MEDIO' ? '👀' : '✅'
-  const nivel  = urgencia==='ALTO' ? 'Precisa agir agora' : urgencia==='MEDIO' ? 'Fique de olho' : 'Tranquilo por enquanto'
+  const cores = {
+    VERMELHO: { emoji:'🔴', label:'Vermelho — Impacto direto provável',    css:'ALTO'  },
+    AMARELO:  { emoji:'🟡', label:'Amarelo — Atenção: simule cenários',    css:'MEDIO' },
+    VERDE:    { emoji:'🟢', label:'Verde — Baixo impacto imediato',        css:'BAIXO' },
+  }
+  const cor = cores[resultado] || cores.AMARELO
 
   document.getElementById('form-area').innerHTML = `
     ${!dbErr ? '<div class="saved-ok"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Diagnóstico salvo com sucesso</div>' : ''}
-    <div class="veredito ${urgencia}">
-      <div class="veredito-emoji">${emoji}</div>
-      <div class="veredito-nivel">${nivel}</div>
+    <div class="veredito ${cor.css}">
+      <div class="veredito-emoji">${cor.emoji}</div>
+      <div class="veredito-nivel">${cor.label}</div>
       <div class="veredito-resumo">${parsed.resumo}</div>
-      <div class="veredito-score">Score de risco: ${pct}/100</div>
     </div>
     <div class="diag-titulo">Análise detalhada</div>
     <div class="diag-texto">${parsed.diagnostico}</div>
@@ -835,8 +866,10 @@ Responda SOMENTE com JSON válido:
 // ── INIT ─────────────────────────────────────────────────────
 renderDados()
 </script>
-  <div style="text-align:center;padding:1.5rem 1rem 2rem;background:#fff;border-top:1px solid #DDE3EC;margin-top:2rem;">
-  <img src="https://raw.githubusercontent.com/goncalves711/reforma-tributaria/main/LOGO%20.png" alt="Logo parceiro" style="height:44px;opacity:0.85;" />
+<div style="text-align:center;padding:1.5rem 1rem 2rem;background:#fff;border-top:1px solid #DDE3EC;margin-top:2rem;">
+  <img src="https://raw.githubusercontent.com/goncalves711/reforma-tributaria/main/LOGO%20.png"
+       alt="Logo parceiro" style="height:44px;opacity:0.85;" />
 </div>
+
 </body>
 </html>
